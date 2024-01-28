@@ -1,0 +1,3 @@
+# Prevent pickling error exceptions
+[runner]
+enforceSerializableSessionState = false
