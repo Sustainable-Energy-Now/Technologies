@@ -77,7 +77,7 @@ def main():
         'initial': 'The initial value.',
         'lifetime':'The operational lifetime of the technology.',
         'mult':'The capacity multiplier.',
-        'order':'The merit order in which the technology is dispatched to meet load.',
+        'merit_order':'The merit order in which the technology is dispatched to meet load.',
         'parasitic_loss':'The percentage of storage capacity lost other than by charging or discharging.',
         'rampdown_max':'The maximum rampdown rate of the technology.',
         'rampup_max':'The maximum rampup rate of the technology.',
@@ -88,7 +88,7 @@ def main():
         'year':'The year of reference.',
         }
     exclude_attributes = [
-        'description', 'dispatchable', 'generator_attribute_id', 'image', 'renewable', 'storage_attribute_id', 'technology_name', 'technology_id',
+        'caption', 'description', 'dispatchable', 'generator_attribute_id', 'image', 'renewable', 'storage_attribute_id', 'technology_name', 'technology_id',
         ]
     if not technology_details.empty:
         # Display technology details
@@ -96,7 +96,7 @@ def main():
         if technology_details.image:
             image_url = 'https://sen.asn.au/wp-content/uploads/' + technology_details.image
             image = Image.open(BytesIO(requests.get(image_url).content))
-            st.image(image, caption="Technology Image", use_column_width=False)
+            st.image(image, caption=technology_details.caption, use_column_width=False)
         else:
             st.warning("No image available for this technology.")
         st.write(f"**Description:** {technology_details.description}")
@@ -104,10 +104,12 @@ def main():
         for column, value in technology_details.items():
             if (pd.notna(value)):
                 with col1:
+                    # Replace break characters with spaces
+                    collabel = column.replace('_', ' ').title()
                     if column not in exclude_attributes:
-                        st.write(f"**{column}**: {value}")
+                        st.write(f"**{collabel}**: {value}")
                     if (column == 'renewable' or column == 'dispatchable'):
-                        st.write(f"**{column}**: {bool(value)}")
+                        st.write(f"**{collabel}**: {bool(value)}")
                 with col2:
                     if (column not in exclude_attributes) or (column == 'renewable' or column == 'dispatchable'):
                         st.markdown(f'<p style="color:blue;">{attribute_explain[column]}</p>', unsafe_allow_html=True)
