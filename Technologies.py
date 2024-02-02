@@ -88,7 +88,7 @@ def main():
         'year':'The year of reference.',
         }
     exclude_attributes = [
-        'caption', 'description', 'dispatchable', 'generator_attribute_id', 'image', 'renewable', 'storage_attribute_id', 'technology_name', 'idTechnologies',
+        'caption', 'description', 'dispatchable', 'idGeneratorAttributes', 'image', 'renewable', 'idStorageAttributes', 'technology_name', 'idTechnologies',
         ]
     if not technology_details.empty:
         # Display technology details
