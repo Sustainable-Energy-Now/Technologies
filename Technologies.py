@@ -31,8 +31,8 @@ def fetch_data():
 # Fetching data from the MySQL database
     technologies_df = \
         conn.query(f"SELECT * FROM senas316_pmdata.Technologies t" +
-            f" LEFT JOIN senas316_pmdata.StorageAttributes s ON t.technology_id = s.technology_id AND t.category = 'storage'" +
-            f" LEFT JOIN senas316_pmdata.GeneratorAttributes g ON t.technology_id = g.technology_id AND t.category = 'generator';", ttl=60)
+            f" LEFT JOIN senas316_pmdata.StorageAttributes s ON t.idTechnologies = s.idTechnologies AND t.category = 'storage'" +
+            f" LEFT JOIN senas316_pmdata.GeneratorAttributes g ON t.idTechnologies = g.idTechnologies AND t.category = 'generator';", ttl=60)
     return technologies_df
 
 conn = st.session_state.conn = init_connection()
@@ -88,7 +88,7 @@ def main():
         'year':'The year of reference.',
         }
     exclude_attributes = [
-        'caption', 'description', 'dispatchable', 'generator_attribute_id', 'image', 'renewable', 'storage_attribute_id', 'technology_name', 'technology_id',
+        'caption', 'description', 'dispatchable', 'generator_attribute_id', 'image', 'renewable', 'storage_attribute_id', 'technology_name', 'idTechnologies',
         ]
     if not technology_details.empty:
         # Display technology details
