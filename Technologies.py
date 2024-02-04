@@ -30,9 +30,9 @@ def init_connection():
 def fetch_data():
 # Fetching data from the MySQL database
     technologies_df = \
-        conn.query(f"SELECT * FROM senasnau_pmdata.Technologies t" +
-            f" LEFT JOIN senasnau_pmdata.StorageAttributes s ON t.idTechnologies = s.idTechnologies AND t.category = 'storage'" +
-            f" LEFT JOIN senasnau_pmdata.GeneratorAttributes g ON t.idTechnologies = g.idTechnologies AND t.category = 'generator';", ttl=60)
+        conn.query(f"SELECT * FROM senas316_pmdata.Technologies t" +
+            f" LEFT JOIN senas316_pmdata.StorageAttributes s ON t.idTechnologies = s.idTechnologies AND t.category = 'storage'" +
+            f" LEFT JOIN senas316_pmdata.GeneratorAttributes g ON t.idTechnologies = g.idTechnologies AND t.category = 'generator';", ttl=60)
     return technologies_df
 
 conn = st.session_state.conn = init_connection()
