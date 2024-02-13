@@ -27,17 +27,36 @@ def init_connection():
     return conn
 
 # Function to fetch data from the database
-def fetch_data():
+def fetch_data(load_year):
 # Fetching data from the MySQL database
     technologies_df = \
-        conn.query(f"SELECT * FROM senas316_pmdata.Technologies t" +
-            f" LEFT JOIN senas316_pmdata.StorageAttributes s ON t.idTechnologies = s.idTechnologies AND t.category = 'storage'" +
-            f" LEFT JOIN senas316_pmdata.GeneratorAttributes g ON t.idTechnologies = g.idTechnologies AND t.category = 'generator';", ttl=60)
+        conn.query(
+            f""" 
+            WITH cte AS (
+            SELECT t.*, 
+            s.capacity_max, s.capacity_min, s.discharge_loss,
+            s.discharge_max, s.parasitic_loss, s.rampdown_max,
+            s.rampup_max, s.recharge_loss, s.recharge_max,
+            g.capacity, g.emissions,
+            g.initial,
+            g.mult,
+            g.fuel,
+            ROW_NUMBER() OVER (PARTITION BY t.technology_name ORDER BY t.year DESC) AS row_num
+            FROM senas316_pmdata.Technologies t
+            LEFT JOIN senas316_pmdata.StorageAttributes s ON t.idTechnologies = s.idTechnologies 
+                AND t.function = 'storage' AND t.year = s.year
+            LEFT JOIN senas316_pmdata.GeneratorAttributes g ON t.idTechnologies = g.idTechnologies 
+                AND t.function = 'generator' AND t.year = g.year
+            WHERE t.year IN (0, {load_year})
+            )
+            SELECT *
+            FROM cte
+            WHERE row_num = 1;
+            """, ttl=60)
     return technologies_df
 
 conn = st.session_state.conn = init_connection()
 conn.reset()
-fetch_data()
 
 def main():
     # Path to the SEN logo PNG file
@@ -52,8 +71,8 @@ def main():
         """
     )
     # Fetch data from the database and create DataFrame
-    data = fetch_data()
-
+    load_year=st.selectbox('**Load Year**',('0', '2022'), index = 1)
+    data = fetch_data(load_year)
     # Allow user to select a technolgy to display
     technology_names = data['technology_name'].unique()
     st.subheader(f"**Select a technology:**")
@@ -65,7 +84,7 @@ def main():
         'capacity': 'The maxiumum storage capacity in mWhs.',
         'capacity_max':'The maximum capacity of the technology.',
         'capacity_min':'The minimum capacity of the technology.',
-        'category':'The role it plays in the grid.',
+        'function':'The role it plays in the grid.',
         'capex':'The initial capital expenditure for the technology.',
         'discharge_loss':'The percentage capacity that is lost in discharging.',
         'discharge_max':'The maxiumum percentage of storage capacity that can be discharged..',
@@ -84,6 +103,7 @@ def main():
         'recharge_loss':'The percentage capacity that is lost in recharging.',
         'recharge_max':'The maximum recharge rate of the technology.',
         'renewable':'Whether the technology can be renewed.',
+        'row_num':'sort field.',
         'VOM':'The variable operating cost of the technology.',
         'year':'The year of reference.',
         }
